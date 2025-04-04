@@ -10,46 +10,6 @@ cat_features = ["Target",
                 "Type",
                 "Location"]
 
-
-class PosEncoding(nn.Module):
-
-    def __init__(self, dim, device, base=10000, bias=0):
-
-        super(PosEncoding, self).__init__()
-        """
-        Initialize the posencoding component
-        :param dim: the encoding dimension 
-		:param device: where to train model
-		:param base: the encoding base
-		:param bias: the encoding bias
-        """
-        p = []
-        sft = []
-        for i in range(dim):
-            b = (i - i % 2) / dim
-            p.append(base ** -b)
-            if i % 2:
-                sft.append(np.pi / 2.0 + bias)
-            else:
-                sft.append(bias)
-        self.device = device
-        self.sft = torch.tensor(
-            sft, dtype=torch.float32).view(1, -1).to(device)
-        self.base = torch.tensor(p, dtype=torch.float32).view(1, -1).to(device)
-
-    def forward(self, pos):
-        with torch.no_grad():
-            if isinstance(pos, list):
-                pos = torch.tensor(pos, dtype=torch.float32).to(self.device)
-            pos = pos.view(-1, 1)
-            x = pos / self.base + self.sft
-            return torch.sin(x)
-
-
-
-
-
-
 class TransEmbedding(nn.Module):
 
     def __init__(self, df=None, device='cpu', dropout=0.2, in_feats=82, cat_features=None):
